@@ -1,18 +1,19 @@
-const readline = require('node:readline').createInterface({
+const readline = require("node:readline").createInterface({
   input: process.stdin,
   output: process.stdout,
 });
 
-const commonCards = ['A', 2, 3, 4, 5, 6, 7, 8, 9, 10, 'J', 'Q', 'K'];
+const commonCards = ["A", 2, 3, 4, 5, 6, 7, 8, 9, 10, "J", "Q", "K"];
 const chips = [
   50, 100, 500, 1000, 2000, 5000, 10000, 50000, 100000, 500000, 1000000,
 ];
 const map = new Map();
 
-map.set(0, 'SPADES');
-map.set(1, 'CLUBS');
-map.set(2, 'HEARTS');
-map.set(3, 'DIAMONDS');
+let splitOp;
+map.set(0, "SPADES");
+map.set(1, "CLUBS");
+map.set(2, "HEARTS");
+map.set(3, "DIAMONDS");
 const Deck = {
   SPADES: [...commonCards],
   CLUBS: [...commonCards],
@@ -45,8 +46,8 @@ class Card {
   }
 }
 
-const restart = Symbol('restart');
-const gameOver = Symbol('gameOver');
+const restart = Symbol("restart");
+const gameOver = Symbol("gameOver");
 class Game extends Card {
   constructor() {
     super();
@@ -64,6 +65,9 @@ class Game extends Card {
     this.stake = 0;
     this.firstServe = true;
     this.isPlayingDoubleDown = false;
+    this.isPlayingSplit = false;
+    this.standAfterPlayingSplit = false;
+    this.firstSetSummationFromSplit = 0;
   }
 
   getBalance() {
@@ -97,21 +101,22 @@ class Game extends Card {
   #serveInitialCards() {
     this.playerCardSummation = this.playCard(2);
     this.checkForAces();
-    console.log('Dealers Card');
+    console.log("Dealers Card");
     this.dealerCardSummation = this.playCard(1, false);
     this.checkForAces(false);
-    console.log('Face down card');
+    console.log("Face down card");
     this.playFaceDownCard();
 
     this.getInput();
   }
+
   placeBets() {
     if (this.getBalance() === 0) {
-      console.log('You are broke. Starting a new game\n');
+      console.log("You are broke. Starting a new game\n");
       this.gameOver();
     }
     console.log(
-      'Place your bets, your current balance is: ' + this.getBalance()
+      "Place your bets, your current balance is: " + this.getBalance()
     );
     const betOptions = this.generateBetOptions();
     readline.question(`${betOptions.toString()}\n`, (input) => {
@@ -132,7 +137,7 @@ class Game extends Card {
           this.#serveInitialCards();
           break;
         default:
-          console.log('Invalid input entered, please try again');
+          console.log("Invalid input entered, please try again");
           this.placeBets();
           break;
       }
@@ -151,13 +156,13 @@ class Game extends Card {
     }
     if (this.checkIfOver21(summationValue)) {
       if (!this.isPlayerTurn) {
-        console.log('You Win');
+        console.log("You Win");
         this.cash += 2 * this.stake;
         this.stake = 0;
       } else {
         this.stake = 0;
       }
-      console.log('Game over');
+      console.log("Game over");
       this[gameOver]();
       return;
     }
@@ -170,7 +175,7 @@ class Game extends Card {
     this.isPlayerTurn = false;
     const [card, suit] = this.dealerCards[this.dealerCards.length - 1];
     console.log(`${card} of ${suit}`);
-    this.checkForAces();
+    this.checkForAces(false);
     this.checkIfOver21(this.dealerCardSummation);
     this.continueGame();
   }
@@ -179,13 +184,47 @@ class Game extends Card {
     if (this.isPlayerTurn) {
       this.getInput();
     } else {
-      if (this.dealerCardSummation <= this.playerCardSummation) {
+      if (this.standAfterPlayingSplit) {
+        if (this.dealerCardSummation < this.firstSetSummationFromSplit) {
+          this.hit();
+        } else if (
+          this.dealerCardSummation === this.firstSetSummationFromSplit &&
+          this.dealerCardSummation >= 17 &&
+          this.dealerCardSummation <= 21
+        ) {
+          console.log("Push");
+          this.cash += this.stake;
+          this.stake /= 2;
+          this.standAfterPlayingSplit = false;
+          this.continueGame();
+        } else if (
+          this.dealerCardSummation > this.firstSetSummationFromSplit &&
+          this.dealerCardSummation <= 21
+        ) {
+          console.log("Dealer wins");
+          this.stake /= 2;
+          this.standAfterPlayingSplit = false;
+          this.continueGame();
+          // this[gameOver]();
+        } else {
+          this.hit();
+        }
+      }
+      if (this.dealerCardSummation < this.playerCardSummation) {
         this.hit();
+      } else if (
+        this.dealerCardSummation === this.playerCardSummation &&
+        this.dealerCardSummation >= 17 &&
+        this.dealerCardSummation <= 21
+      ) {
+        console.log("Push");
+        this.cash += this.stake;
+        this[gameOver]();
       } else if (
         this.dealerCardSummation > this.playerCardSummation &&
         this.dealerCardSummation <= 21
       ) {
-        console.log('Dealer wins');
+        console.log("Dealer wins");
         this[gameOver]();
       } else {
         this.hit();
@@ -196,15 +235,31 @@ class Game extends Card {
   getInput() {
     const hasSufficientBalanceForDoubleDown = this.getBalance() >= this.stake;
     const canDoubleDown = this.firstServe && hasSufficientBalanceForDoubleDown;
+
+    const hasSufficientBalanceForSplit = this.getBalance() >= this.stake;
+    const canSplit =
+      (this.firstServe &&
+        hasSufficientBalanceForSplit &&
+        commonCards.findIndex((card) => card === this.playerCards[0][0]) >= 9 &&
+        commonCards.findIndex((card) => card === this.playerCards[1][0]) >=
+          9) ||
+      commonCards.findIndex((card) => card === this.playerCards[0][0]) ===
+        commonCards.findIndex((card) => card === this.playerCards[1][0]);
     readline.question(
       `Hit or stand?
-      Hit = 1, Stand = 2 ${canDoubleDown ? 'Double = 3' : ''}\n`,
+      Hit = 1, Stand = 2 ${canDoubleDown ? "Double = 3" : ""} ${
+        canSplit ? "Split = 4" : ""
+      }\n`,
       (input) => {
         switch (+input) {
           case 1:
             this.hit();
             break;
           case 2:
+            if (this.isPlayingSplit) {
+              splitOp.call(this);
+              break;
+            }
             this.stand();
             break;
           case 3:
@@ -216,14 +271,54 @@ class Game extends Card {
               this.stand();
               break;
             }
+          case 4:
+            if (canSplit) {
+              this.cash -= this.stake;
+              this.stake *= 2;
+              splitOp = this.#playSplit();
+            }
           default:
-            console.log('Invalid input entered, please try again');
+            console.log("Invalid input entered, please try again");
             this.getInput();
             break;
         }
       }
     );
     this.firstServe = false;
+  }
+
+  #playSplit() {
+    this.isPlayingSplit = true;
+    const secondSetCard = this.playerCards[1];
+    const firstSetCard = this.playerCards[0];
+    this.playerCardSummation = 0;
+    const cardValue =
+      commonCards.findIndex((card) => card === firstSetCard[0]) + 1;
+    if (cardValue === 1) {
+      this.playerCardSummation += 11;
+    } else {
+      this.playerCardSummation += cardValue >= 10 ? 10 : cardValue;
+    }
+    this.hit();
+    this.getInput();
+
+    return function () {
+      const firstSetSummation = this.playerCardSummation;
+      console.log(firstSetSummation);
+      this.firstSetSummationFromSplit = firstSetSummation;
+      this.playerCardSummation = 0;
+      const cardValue =
+        commonCards.findIndex((card) => card === secondSetCard[0]) + 1;
+      if (cardValue === 1) {
+        this.playerCardSummation += 11;
+      } else {
+        this.playerCardSummation += cardValue >= 10 ? 10 : cardValue;
+      }
+      this.isPlayingSplit = false;
+      this.hit();
+      this.standAfterPlayingSplit = true;
+      this.getInput();
+    };
   }
 
   playFaceDownCard() {
@@ -240,9 +335,9 @@ class Game extends Card {
   }
 
   checkIfOver21(value) {
-    console.log('Current value:', value);
+    console.log("Current value:", value);
     if (value > 21) {
-      console.log('Bust');
+      console.log("Bust");
       return true;
     }
     return false;
@@ -269,12 +364,12 @@ class Game extends Card {
 
   checkForAces(player = true) {
     if (player) {
-      const includesAce = this.playerCards.flat().includes('A');
+      const includesAce = this.playerCards.flat().includes("A");
       if (includesAce) {
         this.playerHasAce = true;
       }
     } else {
-      const includesAce = this.dealerCards.flat().includes('A');
+      const includesAce = this.dealerCards.flat().includes("A");
       if (includesAce) {
         this.dealerHasAce = true;
       }
@@ -285,20 +380,38 @@ class Game extends Card {
     switch (isPlayerPlaying) {
       case true:
         if (drawnCard === 11) {
-          this.playerCardSummation += drawnCard;
-          this.playerCardSummation =
-            this.playerCardSummation > 21
-              ? this.playerCardSummation - 10
-              : this.playerCardSummation;
+          if (this.isPlayingSplit) {
+            this.firstSetSummationFromSplit += drawnCard;
+            this.firstSetSummationFromSplit =
+              this.firstSetSummationFromSplit > 21
+                ? this.firstSetSummationFromSplit - 10
+                : this.firstSetSummationFromSplit;
+          } else {
+            this.playerCardSummation += drawnCard;
+            this.playerCardSummation =
+              this.playerCardSummation > 21
+                ? this.playerCardSummation - 10
+                : this.playerCardSummation;
+          }
           this.playerHasAce = true;
         } else {
-          this.playerCardSummation += drawnCard;
-          this.playerCardSummation =
-            this.playerCardSummation > 21 &&
-            this.playerHasAce &&
-            !this.playerAceUsed
-              ? this.playerCardSummation - 10
-              : this.playerCardSummation;
+          if (this.isPlayingSplit) {
+            this.firstSetSummationFromSplit += drawnCard;
+            this.firstSetSummationFromSplit =
+              this.firstSetSummationFromSplit > 21 &&
+              this.playerHasAce &&
+              !this.playerAceUsed
+                ? this.firstSetSummationFromSplit - 10
+                : this.firstSetSummationFromSplit;
+          } else {
+            this.playerCardSummation += drawnCard;
+            this.playerCardSummation =
+              this.playerCardSummation > 21 &&
+              this.playerHasAce &&
+              !this.playerAceUsed
+                ? this.playerCardSummation - 10
+                : this.playerCardSummation;
+          }
         }
         break;
       case false:
@@ -353,7 +466,7 @@ class Game extends Card {
           process.exit();
           break;
         default:
-          console.log('Invalid input entered, please try again');
+          console.log("Invalid input entered, please try again");
           this[gameOver]();
           break;
       }
@@ -370,6 +483,9 @@ class Game extends Card {
     this.gameOver = false;
     this.firstServe = true;
     this.isPlayingDoubleDown = false;
+    this.isPlayingSplit = false;
+    this.firstSetSummationFromSplit = 0;
+    this.standAfterPlayingSplit = false;
     this.cards = structuredClone(Deck);
     this.placeBets();
     // this.playerCardSummation = this.playCard(2);
