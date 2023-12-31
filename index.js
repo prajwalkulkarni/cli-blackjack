@@ -149,7 +149,9 @@ class Game extends Card {
     const drawnCard = this.playCard(1);
     if (this.isPlayerTurn) {
       this.computeCardSummationBasedOnAceCard(drawnCard, true);
-      summationValue = this.playerCardSummation;
+      summationValue = this.isPlayingSplit
+        ? this.firstSetSummationFromSplit
+        : this.playerCardSummation;
     } else {
       this.computeCardSummationBasedOnAceCard(drawnCard);
       summationValue = this.dealerCardSummation;
@@ -161,9 +163,26 @@ class Game extends Card {
         this.stake = 0;
       } else {
         this.stake = 0;
+        this.isPlayingSplit
+          ? (() => {
+              splitOp.call(this);
+              return;
+            })()
+          : null;
       }
+
+      // this.standAfterPlayingSplit ? this.continueGame() : null;
+      // this.isPlayingSplit
+      //   ? (() => {
+      //       splitOp.call(this);
+      //     })()
+      //   : function () {
+      //       console.log('Game over');
+      //       this[gameOver]();
+      //     }.call(this);
       console.log("Game over");
       this[gameOver]();
+
       return;
     }
     if (!this.isPlayingDoubleDown) {
@@ -185,7 +204,10 @@ class Game extends Card {
       this.getInput();
     } else {
       if (this.standAfterPlayingSplit) {
-        if (this.dealerCardSummation < this.firstSetSummationFromSplit) {
+        if (
+          this.dealerCardSummation <
+          Math.min(this.firstSetSummationFromSplit, this.playerCardSummation)
+        ) {
           this.hit();
         } else if (
           this.dealerCardSummation === this.firstSetSummationFromSplit &&
@@ -206,6 +228,12 @@ class Game extends Card {
           this.standAfterPlayingSplit = false;
           this.continueGame();
           // this[gameOver]();
+        } else if (
+          this.dealerCardSummation > this.firstSetSummationFromSplit ||
+          (this.dealerCardSummation > this.playerCardSummation &&
+            this.dealerCardSummation > 21)
+        ) {
+          this[gameOver]();
         } else {
           this.hit();
         }
@@ -243,8 +271,9 @@ class Game extends Card {
         commonCards.findIndex((card) => card === this.playerCards[0][0]) >= 9 &&
         commonCards.findIndex((card) => card === this.playerCards[1][0]) >=
           9) ||
-      commonCards.findIndex((card) => card === this.playerCards[0][0]) ===
-        commonCards.findIndex((card) => card === this.playerCards[1][0]);
+      (this.firstServe &&
+        commonCards.findIndex((card) => card === this.playerCards[0][0]) ===
+          commonCards.findIndex((card) => card === this.playerCards[1][0]));
     readline.question(
       `Hit or stand?
       Hit = 1, Stand = 2 ${canDoubleDown ? "Double = 3" : ""} ${
@@ -276,7 +305,9 @@ class Game extends Card {
               this.cash -= this.stake;
               this.stake *= 2;
               splitOp = this.#playSplit();
+              break;
             }
+
           default:
             console.log("Invalid input entered, please try again");
             this.getInput();
@@ -291,21 +322,20 @@ class Game extends Card {
     this.isPlayingSplit = true;
     const secondSetCard = this.playerCards[1];
     const firstSetCard = this.playerCards[0];
-    this.playerCardSummation = 0;
+    this.firstSetSummationFromSplit = 0;
     const cardValue =
       commonCards.findIndex((card) => card === firstSetCard[0]) + 1;
     if (cardValue === 1) {
-      this.playerCardSummation += 11;
+      this.firstSetSummationFromSplit += 11;
     } else {
-      this.playerCardSummation += cardValue >= 10 ? 10 : cardValue;
+      this.firstSetSummationFromSplit += cardValue >= 10 ? 10 : cardValue;
     }
     this.hit();
     this.getInput();
 
     return function () {
-      const firstSetSummation = this.playerCardSummation;
+      const firstSetSummation = this.firstSetSummationFromSplit;
       console.log(firstSetSummation);
-      this.firstSetSummationFromSplit = firstSetSummation;
       this.playerCardSummation = 0;
       const cardValue =
         commonCards.findIndex((card) => card === secondSetCard[0]) + 1;
@@ -393,24 +423,31 @@ class Game extends Card {
                 ? this.playerCardSummation - 10
                 : this.playerCardSummation;
           }
+
           this.playerHasAce = true;
+          this.playerAceUsed = true;
         } else {
           if (this.isPlayingSplit) {
             this.firstSetSummationFromSplit += drawnCard;
-            this.firstSetSummationFromSplit =
+            if (
               this.firstSetSummationFromSplit > 21 &&
               this.playerHasAce &&
               !this.playerAceUsed
-                ? this.firstSetSummationFromSplit - 10
-                : this.firstSetSummationFromSplit;
+            ) {
+              this.firstSetSummationFromSplit -= 10;
+              this.playerAceUsed = true;
+            }
           } else {
             this.playerCardSummation += drawnCard;
-            this.playerCardSummation =
+
+            if (
               this.playerCardSummation > 21 &&
               this.playerHasAce &&
               !this.playerAceUsed
-                ? this.playerCardSummation - 10
-                : this.playerCardSummation;
+            ) {
+              this.playerCardSummation -= 10;
+              this.playerAceUsed = true;
+            }
           }
         }
         break;
@@ -422,16 +459,17 @@ class Game extends Card {
               ? this.dealerCardSummation - 10
               : this.dealerCardSummation;
           this.dealerHasAce = true;
+          this.dealerAceUsed = true;
         } else {
           this.dealerCardSummation += drawnCard;
-          this.dealerCardSummation =
+          if (
             this.dealerCardSummation > 21 &&
             this.dealerHasAce &&
             !this.dealerAceUsed
-              ? this.dealerCardSummation - 10
-              : this.dealerCardSummation;
-
-          this.dealerAceUsed = true;
+          ) {
+            this.dealerCardSummation -= 10;
+            this.dealerAceUsed = true;
+          }
         }
         break;
       default:
@@ -442,15 +480,17 @@ class Game extends Card {
               ? this.dealerCardSummation - 10
               : this.dealerCardSummation;
           this.dealerHasAce = true;
+          this.dealerAceUsed = true;
         } else {
           this.dealerCardSummation += drawnCard;
-          this.dealerCardSummation =
+          if (
             this.dealerCardSummation > 21 &&
             this.dealerHasAce &&
             !this.dealerAceUsed
-              ? this.dealerCardSummation - 10
-              : this.dealerCardSummation;
-          this.dealerAceUsed = true;
+          ) {
+            this.dealerCardSummation -= 10;
+            this.dealerAceUsed = true;
+          }
         }
         break;
     }
@@ -477,6 +517,8 @@ class Game extends Card {
     this.dealerCardSummation = 0;
     this.playerHasAce = false;
     this.dealerHasAce = false;
+    this.playerAceUsed = false;
+    this.dealerAceUsed = false;
     this.isPlayerTurn = true;
     this.playerCards = [];
     this.dealerCards = [];
