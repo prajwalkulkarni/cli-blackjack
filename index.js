@@ -1,19 +1,19 @@
-const readline = require("node:readline").createInterface({
+const readline = require('node:readline').createInterface({
   input: process.stdin,
   output: process.stdout,
 });
 
-const commonCards = ["A", 2, 3, 4, 5, 6, 7, 8, 9, 10, "J", "Q", "K"];
+const commonCards = ['A', 2, 3, 4, 5, 6, 7, 8, 9, 10, 'J', 'Q', 'K'];
 const chips = [
   50, 100, 500, 1000, 2000, 5000, 10000, 50000, 100000, 500000, 1000000,
 ];
 const map = new Map();
 
 let splitOp;
-map.set(0, "SPADES");
-map.set(1, "CLUBS");
-map.set(2, "HEARTS");
-map.set(3, "DIAMONDS");
+map.set(0, 'SPADES');
+map.set(1, 'CLUBS');
+map.set(2, 'HEARTS');
+map.set(3, 'DIAMONDS');
 const Deck = {
   SPADES: [...commonCards],
   CLUBS: [...commonCards],
@@ -46,8 +46,8 @@ class Card {
   }
 }
 
-const restart = Symbol("restart");
-const gameOver = Symbol("gameOver");
+const restart = Symbol('restart');
+const gameOver = Symbol('gameOver');
 class Game extends Card {
   constructor() {
     super();
@@ -101,10 +101,10 @@ class Game extends Card {
   #serveInitialCards() {
     this.playerCardSummation = this.playCard(2);
     this.checkForAces();
-    console.log("Dealers Card");
+    console.log('Dealers Card');
     this.dealerCardSummation = this.playCard(1, false);
     this.checkForAces(false);
-    console.log("Face down card");
+    console.log('Face down card');
     this.playFaceDownCard();
 
     this.getInput();
@@ -112,11 +112,11 @@ class Game extends Card {
 
   placeBets() {
     if (this.getBalance() === 0) {
-      console.log("You are broke. Starting a new game\n");
+      console.log('You are broke. Starting a new game\n');
       this.gameOver();
     }
     console.log(
-      "Place your bets, your current balance is: " + this.getBalance()
+      'Place your bets, your current balance is: ' + this.getBalance()
     );
     const betOptions = this.generateBetOptions();
     readline.question(`${betOptions.toString()}\n`, (input) => {
@@ -137,7 +137,7 @@ class Game extends Card {
           this.#serveInitialCards();
           break;
         default:
-          console.log("Invalid input entered, please try again");
+          console.log('Invalid input entered, please try again');
           this.placeBets();
           break;
       }
@@ -158,7 +158,7 @@ class Game extends Card {
     }
     if (this.checkIfOver21(summationValue)) {
       if (!this.isPlayerTurn) {
-        console.log("You Win");
+        console.log('You Win');
         this.cash += 2 * this.stake;
         this.stake = 0;
       } else {
@@ -180,7 +180,7 @@ class Game extends Card {
       //       console.log('Game over');
       //       this[gameOver]();
       //     }.call(this);
-      console.log("Game over");
+      console.log('Game over');
       this[gameOver]();
 
       return;
@@ -204,58 +204,87 @@ class Game extends Card {
       this.getInput();
     } else {
       if (this.standAfterPlayingSplit) {
+        if (this.dealerCardSummation < 17) {
+          this.hit();
+        } else {
+          const dealerAlive =
+            this.dealerCardSummation >= 17 && this.dealerCardSummation <= 21;
+          if (
+            !dealerAlive &&
+            this.firstSetSummationFromSplit <= 21 &&
+            this.playerCardSummation <= 21
+          ) {
+            console.log('You win both hands');
+            this.cash += 2 * this.stake;
+          }
+
+          if (
+            this.dealerCardSummation > this.firstSetSummationFromSplit ||
+            this.firstSetSummationFromSplit > 21
+          ) {
+            console.log('Dealer wins against 1st hand');
+          }
+          if (
+            this.dealerCardSummation > this.playerCardSummation ||
+            this.playerCardSummation > 21
+          ) {
+            console.log('Dealer wins against 2nd hand');
+          }
+
+          if (this.dealerCardSummation === this.firstSetSummationFromSplit) {
+            console.log('Push');
+            const stake1 = this.stake / 2;
+            this.cash += stake1;
+          }
+          if (this.dealerCardSummation === this.playerCardSummation) {
+            console.log('Push');
+            const stake2 = this.stake / 2;
+            this.cash += stake2;
+          }
+
+          if (
+            (this.firstSetSummationFromSplit > this.dealerCardSummation &&
+              this.firstSetSummationFromSplit <= 21) ||
+            !dealerAlive
+          ) {
+            console.log('You win the 1st hand');
+            this.cash += this.stake;
+          }
+          if (
+            (this.playerCardSummation > this.dealerCardSummation &&
+              this.playerCardSummation <= 21) ||
+            !dealerAlive
+          ) {
+            console.log('You win the 2nd hand');
+            this.cash += this.stake;
+          }
+          this[gameOver]();
+        }
+      } else {
         if (
-          this.dealerCardSummation <
-          Math.min(this.firstSetSummationFromSplit, this.playerCardSummation)
+          this.dealerCardSummation < 17 &&
+          this.dealerCardSummation < this.playerCardSummation
         ) {
           this.hit();
         } else if (
-          this.dealerCardSummation === this.firstSetSummationFromSplit &&
+          this.dealerCardSummation === this.playerCardSummation &&
           this.dealerCardSummation >= 17 &&
           this.dealerCardSummation <= 21
         ) {
-          console.log("Push");
+          console.log('Push');
           this.cash += this.stake;
-          this.stake /= 2;
-          this.standAfterPlayingSplit = false;
-          this.continueGame();
+          this[gameOver]();
         } else if (
-          this.dealerCardSummation > this.firstSetSummationFromSplit &&
+          this.dealerCardSummation > this.playerCardSummation &&
           this.dealerCardSummation <= 21
         ) {
-          console.log("Dealer wins");
-          this.stake /= 2;
-          this.standAfterPlayingSplit = false;
-          this.continueGame();
-          // this[gameOver]();
-        } else if (
-          this.dealerCardSummation > this.firstSetSummationFromSplit ||
-          (this.dealerCardSummation > this.playerCardSummation &&
-            this.dealerCardSummation > 21)
-        ) {
+          console.log('Dealer wins');
           this[gameOver]();
         } else {
-          this.hit();
+          console.log('You win');
+          this.cash += 2 * this.stake;
+          this[gameOver]();
         }
-      }
-      if (this.dealerCardSummation < this.playerCardSummation) {
-        this.hit();
-      } else if (
-        this.dealerCardSummation === this.playerCardSummation &&
-        this.dealerCardSummation >= 17 &&
-        this.dealerCardSummation <= 21
-      ) {
-        console.log("Push");
-        this.cash += this.stake;
-        this[gameOver]();
-      } else if (
-        this.dealerCardSummation > this.playerCardSummation &&
-        this.dealerCardSummation <= 21
-      ) {
-        console.log("Dealer wins");
-        this[gameOver]();
-      } else {
-        this.hit();
       }
     }
   }
@@ -276,8 +305,8 @@ class Game extends Card {
           commonCards.findIndex((card) => card === this.playerCards[1][0]));
     readline.question(
       `Hit or stand?
-      Hit = 1, Stand = 2 ${canDoubleDown ? "Double = 3" : ""} ${
-        canSplit ? "Split = 4" : ""
+      Hit = 1, Stand = 2 ${canDoubleDown ? 'Double = 3' : ''} ${
+        canSplit ? 'Split = 4' : ''
       }\n`,
       (input) => {
         switch (+input) {
@@ -309,7 +338,7 @@ class Game extends Card {
             }
 
           default:
-            console.log("Invalid input entered, please try again");
+            console.log('Invalid input entered, please try again');
             this.getInput();
             break;
         }
@@ -365,9 +394,9 @@ class Game extends Card {
   }
 
   checkIfOver21(value) {
-    console.log("Current value:", value);
+    console.log('Current value:', value);
     if (value > 21) {
-      console.log("Bust");
+      console.log('Bust');
       return true;
     }
     return false;
@@ -394,12 +423,12 @@ class Game extends Card {
 
   checkForAces(player = true) {
     if (player) {
-      const includesAce = this.playerCards.flat().includes("A");
+      const includesAce = this.playerCards.flat().includes('A');
       if (includesAce) {
         this.playerHasAce = true;
       }
     } else {
-      const includesAce = this.dealerCards.flat().includes("A");
+      const includesAce = this.dealerCards.flat().includes('A');
       if (includesAce) {
         this.dealerHasAce = true;
       }
@@ -506,7 +535,7 @@ class Game extends Card {
           process.exit();
           break;
         default:
-          console.log("Invalid input entered, please try again");
+          console.log('Invalid input entered, please try again');
           this[gameOver]();
           break;
       }
@@ -529,6 +558,7 @@ class Game extends Card {
     this.firstSetSummationFromSplit = 0;
     this.standAfterPlayingSplit = false;
     this.cards = structuredClone(Deck);
+    this.stake = 0;
     this.placeBets();
     // this.playerCardSummation = this.playCard(2);
     // this.checkForAces();
