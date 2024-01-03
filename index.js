@@ -9,7 +9,7 @@ const chips = [
 ];
 const map = new Map();
 
-let splitOp;
+let splitSecondHand;
 map.set(0, "♤");
 map.set(1, "♣");
 map.set(2, "♡");
@@ -103,7 +103,7 @@ class Game extends Card {
     console.log("\nDealers Card");
     this.dealerCardSummation = this.playCard(1, false);
     this.checkForAces(false);
-    console.log("Face down card");
+    console.log("Face down card\n");
     this.playFaceDownCard();
 
     this.getInput();
@@ -155,7 +155,7 @@ class Game extends Card {
       this.computeCardSummationBasedOnAceCard(drawnCard);
       summationValue = this.dealerCardSummation;
     }
-    if (this.checkIfOver21(summationValue)) {
+    if (this.#checkIfOver21(summationValue)) {
       if (!this.isPlayerTurn) {
         console.log("You Win");
         this.cash +=
@@ -167,7 +167,7 @@ class Game extends Card {
       } else {
         this.isPlayingSplit
           ? (() => {
-              splitOp.call(this);
+              splitSecondHand.call(this);
               return;
             })()
           : null;
@@ -183,80 +183,80 @@ class Game extends Card {
       return;
     }
     if (!this.isPlayingDoubleDown) {
-      this.continueGame();
+      this.#continueGame();
     }
   }
 
   stand() {
+    console.log("Dealer's Turn\n");
     this.isPlayerTurn = false;
     const [card, suit] = this.dealerCards[this.dealerCards.length - 1];
-    console.log(`${card} of ${suit}`);
+    console.log(`Face down card:${card} of ${suit}`);
     this.checkForAces(false);
-    this.checkIfOver21(this.dealerCardSummation);
-    this.continueGame();
+    this.#checkIfOver21(this.dealerCardSummation);
+    this.#continueGame();
   }
 
-  continueGame() {
+  #continueGame() {
     if (this.isPlayerTurn) {
       this.getInput();
     } else {
       if (this.standAfterPlayingSplit) {
         if (this.dealerCardSummation < 17) {
           this.hit();
-        } else {
-          const dealerAlive =
-            this.dealerCardSummation >= 17 && this.dealerCardSummation <= 21;
-          if (
-            !dealerAlive &&
-            this.firstSetSummationFromSplit <= 21 &&
-            this.playerCardSummation <= 21
-          ) {
-            console.log("You win both hands");
-            this.cash += 2 * this.stake;
-          }
-
-          if (
-            this.dealerCardSummation > this.firstSetSummationFromSplit ||
-            this.firstSetSummationFromSplit > 21
-          ) {
-            console.log("Dealer wins against 1st hand");
-          }
-          if (
-            this.dealerCardSummation > this.playerCardSummation ||
-            this.playerCardSummation > 21
-          ) {
-            console.log("Dealer wins against 2nd hand");
-          }
-
-          if (this.dealerCardSummation === this.firstSetSummationFromSplit) {
-            console.log("Push");
-            const stake1 = this.stake / 2;
-            this.cash += stake1;
-          }
-          if (this.dealerCardSummation === this.playerCardSummation) {
-            console.log("Push");
-            const stake2 = this.stake / 2;
-            this.cash += stake2;
-          }
-
-          if (
-            (this.firstSetSummationFromSplit > this.dealerCardSummation &&
-              this.firstSetSummationFromSplit <= 21) ||
-            !dealerAlive
-          ) {
-            console.log("You win the 1st hand");
-            this.cash += this.stake;
-          }
-          if (
-            (this.playerCardSummation > this.dealerCardSummation &&
-              this.playerCardSummation <= 21) ||
-            !dealerAlive
-          ) {
-            console.log("You win the 2nd hand");
-            this.cash += this.stake;
-          }
-          this[gameOver]();
+          return;
         }
+        const dealerAlive =
+          this.dealerCardSummation >= 17 && this.dealerCardSummation <= 21;
+
+        if (
+          !dealerAlive &&
+          this.firstSetSummationFromSplit <= 21 &&
+          this.playerCardSummation <= 21
+        ) {
+          console.log("You win both hands");
+          this.cash += 2 * this.stake;
+        }
+
+        if (
+          this.dealerCardSummation > this.firstSetSummationFromSplit ||
+          this.firstSetSummationFromSplit > 21
+        ) {
+          console.log("Dealer wins against 1st hand");
+        }
+        if (
+          this.dealerCardSummation > this.playerCardSummation ||
+          this.playerCardSummation > 21
+        ) {
+          console.log("Dealer wins against 2nd hand");
+        }
+
+        if (this.dealerCardSummation === this.firstSetSummationFromSplit) {
+          console.log("Push");
+          this.cash += this.stake / 2;
+        }
+        if (this.dealerCardSummation === this.playerCardSummation) {
+          console.log("Push");
+          this.cash += this.stake / 2;
+        }
+
+        if (
+          (this.firstSetSummationFromSplit > this.dealerCardSummation &&
+            this.firstSetSummationFromSplit <= 21) ||
+          !dealerAlive
+        ) {
+          console.log("You win the 1st hand");
+          this.cash += this.stake;
+        }
+        if (
+          (this.playerCardSummation > this.dealerCardSummation &&
+            this.playerCardSummation <= 21) ||
+          !dealerAlive
+        ) {
+          console.log("You win the 2nd hand");
+          this.cash += this.stake;
+        }
+        this[gameOver]();
       } else {
         if (
           this.dealerCardSummation < 17 &&
@@ -286,12 +286,9 @@ class Game extends Card {
     }
   }
 
-  getInput() {
-    const hasSufficientBalanceForDoubleDown = this.getBalance() >= this.stake;
-    const canDoubleDown = this.firstServe && hasSufficientBalanceForDoubleDown;
-
+  #canSplit() {
     const hasSufficientBalanceForSplit = this.getBalance() >= this.stake;
-    const canSplit =
+    return (
       (this.firstServe &&
         hasSufficientBalanceForSplit &&
         commonCards.findIndex((card) => card === this.playerCards[0][0]) >= 9 &&
@@ -299,7 +296,18 @@ class Game extends Card {
           9) ||
       (this.firstServe &&
         commonCards.findIndex((card) => card === this.playerCards[0][0]) ===
-          commonCards.findIndex((card) => card === this.playerCards[1][0]));
+          commonCards.findIndex((card) => card === this.playerCards[1][0]))
+    );
+  }
+
+  #canDoubleDown() {
+    const hasSufficientBalanceForDoubleDown = this.getBalance() >= this.stake;
+    return this.firstServe && hasSufficientBalanceForDoubleDown;
+  }
+
+  getInput() {
+    const canDoubleDown = this.#canDoubleDown();
+    const canSplit = this.#canSplit();
     readline.question(
       `Hit or stand?\nHit = 1, Stand = 2 ${canDoubleDown ? "Double = 3" : ""} ${
         canSplit ? "Split = 4" : ""
@@ -311,7 +319,7 @@ class Game extends Card {
             break;
           case 2:
             if (this.isPlayingSplit) {
-              splitOp.call(this);
+              splitSecondHand.call(this);
               break;
             }
             this.stand();
@@ -329,7 +337,7 @@ class Game extends Card {
             if (canSplit) {
               this.cash -= this.stake;
               this.stake *= 2;
-              splitOp = this.#playSplit();
+              splitSecondHand = this.#playSplit();
               break;
             }
 
@@ -389,7 +397,7 @@ class Game extends Card {
     this.dealerCardSummation += cardValueSummation;
   }
 
-  checkIfOver21(value) {
+  #checkIfOver21(value) {
     console.log("Current value:", value);
     if (value > 21) {
       console.log("Bust");
@@ -477,26 +485,6 @@ class Game extends Card {
         }
         break;
       case false:
-        if (drawnCard === 11) {
-          this.dealerCardSummation += drawnCard;
-          this.dealerCardSummation =
-            this.dealerCardSummation > 21
-              ? this.dealerCardSummation - 10
-              : this.dealerCardSummation;
-          this.dealerHasAce = true;
-          this.dealerAceUsed = true;
-        } else {
-          this.dealerCardSummation += drawnCard;
-          if (
-            this.dealerCardSummation > 21 &&
-            this.dealerHasAce &&
-            !this.dealerAceUsed
-          ) {
-            this.dealerCardSummation -= 10;
-            this.dealerAceUsed = true;
-          }
-        }
-        break;
       default:
         if (drawnCard === 11) {
           this.dealerCardSummation += drawnCard;
@@ -529,7 +517,6 @@ class Game extends Card {
           break;
         case 2:
           process.exit();
-          break;
         default:
           console.log("Invalid input entered, please try again");
           this[gameOver]();
