@@ -10,15 +10,15 @@ const chips = [
 const map = new Map();
 
 let splitOp;
-map.set(0, "SPADES");
-map.set(1, "CLUBS");
-map.set(2, "HEARTS");
-map.set(3, "DIAMONDS");
+map.set(0, "♤");
+map.set(1, "♣");
+map.set(2, "♡");
+map.set(3, "♦");
 const Deck = {
-  SPADES: [...commonCards],
-  CLUBS: [...commonCards],
-  HEARTS: [...commonCards],
-  DIAMONDS: [...commonCards],
+  "♦": [...commonCards],
+  "♣": [...commonCards],
+  "♡": [...commonCards],
+  "♤": [...commonCards],
 };
 class Card {
   constructor() {
@@ -60,7 +60,6 @@ class Game extends Card {
     this.isPlayerTurn = true;
     this.playerCards = [];
     this.dealerCards = [];
-    this.gameOver = false;
     this.cash = 2000;
     this.stake = 0;
     this.firstServe = true;
@@ -101,7 +100,7 @@ class Game extends Card {
   #serveInitialCards() {
     this.playerCardSummation = this.playCard(2);
     this.checkForAces();
-    console.log("Dealers Card");
+    console.log("\nDealers Card");
     this.dealerCardSummation = this.playCard(1, false);
     this.checkForAces(false);
     console.log("Face down card");
@@ -110,10 +109,10 @@ class Game extends Card {
     this.getInput();
   }
 
-  placeBets() {
+  startGame() {
     if (this.getBalance() === 0) {
       console.log("You are broke. Starting a new game\n");
-      this.gameOver();
+      this[gameOver]();
     }
     console.log(
       "Place your bets, your current balance is: " + this.getBalance()
@@ -138,7 +137,7 @@ class Game extends Card {
           break;
         default:
           console.log("Invalid input entered, please try again");
-          this.placeBets();
+          this.startGame();
           break;
       }
     });
@@ -159,7 +158,12 @@ class Game extends Card {
     if (this.checkIfOver21(summationValue)) {
       if (!this.isPlayerTurn) {
         console.log("You Win");
-        this.cash += 2 * this.stake;
+        this.cash +=
+          this.standAfterPlayingSplit &&
+          (this.playerCardSummation > 21 ||
+            this.firstSetSummationFromSplit > 21)
+            ? this.stake
+            : 2 * this.stake;
       } else {
         this.isPlayingSplit
           ? (() => {
@@ -297,8 +301,7 @@ class Game extends Card {
         commonCards.findIndex((card) => card === this.playerCards[0][0]) ===
           commonCards.findIndex((card) => card === this.playerCards[1][0]));
     readline.question(
-      `Hit or stand?
-      Hit = 1, Stand = 2 ${canDoubleDown ? "Double = 3" : ""} ${
+      `Hit or stand?\nHit = 1, Stand = 2 ${canDoubleDown ? "Double = 3" : ""} ${
         canSplit ? "Split = 4" : ""
       }\n`,
       (input) => {
@@ -544,7 +547,6 @@ class Game extends Card {
     this.isPlayerTurn = true;
     this.playerCards = [];
     this.dealerCards = [];
-    this.gameOver = false;
     this.firstServe = true;
     this.isPlayingDoubleDown = false;
     this.isPlayingSplit = false;
@@ -552,28 +554,11 @@ class Game extends Card {
     this.standAfterPlayingSplit = false;
     this.cards = structuredClone(Deck);
     this.stake = 0;
-    this.placeBets();
-    // this.playerCardSummation = this.playCard(2);
-    // this.checkForAces();
-    // console.log('Dealers Card');
-    // this.dealerCardSummation = play.playCard(1, false);
-    // this.checkForAces();
-    // console.log('Face down card');
-    // this.playFaceDownCard();
-
-    // this.getInput();
+    this.startGame();
   }
 }
 
 const play = new Game();
 
-play.placeBets();
-// play.playerCardSummation = play.playCard(2);
-// play.checkForAces();
-// console.log('Dealers Card');
-// play.dealerCardSummation = play.playCard(1, false);
-// play.checkForAces(false);
-// console.log('Face down card');
-// play.playFaceDownCard();
-
-// play.getInput();
+play.startGame();
+//https://stackoverflow.com/questions/77746928/nextui-pagination-paginationitemtype-dots-default-functionality-being-overwrit
