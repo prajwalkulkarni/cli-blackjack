@@ -1,12 +1,5 @@
-const readline = require("node:readline").createInterface({
-  input: process.stdin,
-  output: process.stdout,
-});
+import { readLine, commonCards, chips } from "./constants.js";
 
-const commonCards = ["A", 2, 3, 4, 5, 6, 7, 8, 9, 10, "J", "Q", "K"];
-const chips = [
-  50, 100, 500, 1000, 2000, 5000, 10000, 50000, 100000, 500000, 1000000,
-];
 const map = new Map();
 
 let splitSecondHand;
@@ -118,7 +111,7 @@ class Game extends Card {
       "Place your bets, your current balance is: " + this.getBalance()
     );
     const betOptions = this.generateBetOptions();
-    readline.question(`${betOptions.toString()}\n`, (input) => {
+    readLine.question(`${betOptions.toString()}\n`, (input) => {
       switch (+input) {
         case 1:
           this.stake = betOptions[0];
@@ -308,7 +301,7 @@ class Game extends Card {
   getInput() {
     const canDoubleDown = this.#canDoubleDown();
     const canSplit = this.#canSplit();
-    readline.question(
+    readLine.question(
       `Hit or stand?\nHit = 1, Stand = 2 ${canDoubleDown ? "Double = 3" : ""} ${
         canSplit ? "Split = 4" : ""
       }\n`,
@@ -510,7 +503,7 @@ class Game extends Card {
   }
 
   [gameOver]() {
-    readline.question(`Play Again = 1, Exit = 2\n`, (input) => {
+    readLine.question(`Play Again = 1, Exit = 2\n`, (input) => {
       switch (+input) {
         case 1:
           this[restart]();
