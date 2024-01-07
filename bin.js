@@ -538,5 +538,4 @@ class Game extends Card {
 }
 
 const play = new Game();
-
 play.startGame();
