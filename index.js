@@ -39,8 +39,6 @@ class Card {
   }
 }
 
-const restart = Symbol("restart");
-const gameOver = Symbol("gameOver");
 class Game extends Card {
   constructor() {
     super();
@@ -105,7 +103,7 @@ class Game extends Card {
   startGame() {
     if (this.#getBalance() === 0) {
       console.log("You are broke. Starting a new game\n");
-      this[gameOver]();
+      this.#gameOver();
     }
     console.log(
       "Place your bets, your current balance is: " + this.#getBalance()
@@ -171,7 +169,7 @@ class Game extends Card {
       }
 
       console.log("Game over");
-      this[gameOver]();
+      this.#gameOver();
 
       return;
     }
@@ -249,7 +247,7 @@ class Game extends Card {
           console.log("You win the 2nd hand");
           this.cash += this.stake;
         }
-        this[gameOver]();
+        this.#gameOver();
       } else {
         if (
           this.dealerCardSummation < 17 &&
@@ -263,17 +261,17 @@ class Game extends Card {
         ) {
           console.log("Push");
           this.cash += this.stake;
-          this[gameOver]();
+          this.#gameOver();
         } else if (
           this.dealerCardSummation > this.playerCardSummation &&
           this.dealerCardSummation <= 21
         ) {
           console.log("Dealer wins");
-          this[gameOver]();
+          this.#gameOver();
         } else {
           console.log("You win");
           this.cash += 2 * this.stake;
-          this[gameOver]();
+          this.#gameOver();
         }
       }
     }
@@ -502,22 +500,22 @@ class Game extends Card {
     }
   }
 
-  [gameOver]() {
+  #gameOver() {
     readLine.question(`Play Again = 1, Exit = 2\n`, (input) => {
       switch (+input) {
         case 1:
-          this[restart]();
+          this.#restart();
           break;
         case 2:
           process.exit();
         default:
           console.log("Invalid input entered, please try again");
-          this[gameOver]();
+          this.#gameOver();
           break;
       }
     });
   }
-  [restart]() {
+  #restart() {
     this.playerCardSummation = 0;
     this.dealerCardSummation = 0;
     this.playerHasAce = false;
