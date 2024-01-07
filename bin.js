@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 import { readLine, commonCards, chips } from "./constants.js";
 
 const map = new Map();
@@ -251,7 +252,7 @@ class Game extends Card {
       } else {
         if (
           this.dealerCardSummation < 17 &&
-          this.dealerCardSummation < this.playerCardSummation
+          this.dealerCardSummation <= this.playerCardSummation
         ) {
           this.hit();
         } else if (

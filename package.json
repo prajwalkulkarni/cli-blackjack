@@ -1,8 +1,7 @@
 {
   "name": "cli-blackjack",
   "version": "1.0.0",
-  "description": "CLI based blackjack game",
-  "main": "index.ts",
+  "description": "Blackjack on command line",
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -24,7 +23,5 @@
     "url": "https://github.com/prajwalkulkarni/cli-blackjack/issues"
   },
   "homepage": "https://github.com/prajwalkulkarni/cli-blackjack#readme",
-  "devDependencies": {
-    "typescript": "^5.3.2"
-  }
+  "bin":"./bin.js"
 }
