@@ -62,17 +62,17 @@ class Game extends Card {
     this.firstSetSummationFromSplit = 0;
   }
 
-  getBalance() {
+  #getBalance() {
     return this.cash;
   }
 
-  hasSufficientBalance() {
-    return this.getBalance() > 0;
+  #hasSufficientBalance() {
+    return this.#getBalance() > 0;
   }
 
-  generateBetOptions() {
-    if (this.hasSufficientBalance()) {
-      const balance = this.getBalance();
+  #generateBetOptions() {
+    if (this.#hasSufficientBalance()) {
+      const balance = this.#getBalance();
 
       if (balance <= 500) {
         return chips.slice(0, 2);
@@ -91,26 +91,26 @@ class Game extends Card {
   }
 
   #serveInitialCards() {
-    this.playerCardSummation = this.playCard(2);
-    this.checkForAces();
+    this.playerCardSummation = this.#playCard(2);
+    this.#checkForAces();
     console.log("\nDealers Card");
-    this.dealerCardSummation = this.playCard(1, false);
-    this.checkForAces(false);
+    this.dealerCardSummation = this.#playCard(1, false);
+    this.#checkForAces(false);
     console.log("Face down card\n");
-    this.playFaceDownCard();
+    this.#playFaceDownCard();
 
     this.getInput();
   }
 
   startGame() {
-    if (this.getBalance() === 0) {
+    if (this.#getBalance() === 0) {
       console.log("You are broke. Starting a new game\n");
       this[gameOver]();
     }
     console.log(
-      "Place your bets, your current balance is: " + this.getBalance()
+      "Place your bets, your current balance is: " + this.#getBalance()
     );
-    const betOptions = this.generateBetOptions();
+    const betOptions = this.#generateBetOptions();
     readLine.question(`${betOptions.toString()}\n`, (input) => {
       switch (+input) {
         case 1:
@@ -138,14 +138,14 @@ class Game extends Card {
 
   hit() {
     let summationValue = 0;
-    const drawnCard = this.playCard(1);
+    const drawnCard = this.#playCard(1);
     if (this.isPlayerTurn) {
-      this.computeCardSummationBasedOnAceCard(drawnCard, true);
+      this.#computeCardSummationBasedOnAceCard(drawnCard, true);
       summationValue = this.isPlayingSplit
         ? this.firstSetSummationFromSplit
         : this.playerCardSummation;
     } else {
-      this.computeCardSummationBasedOnAceCard(drawnCard);
+      this.#computeCardSummationBasedOnAceCard(drawnCard);
       summationValue = this.dealerCardSummation;
     }
     if (this.#checkIfOver21(summationValue)) {
@@ -185,7 +185,7 @@ class Game extends Card {
     this.isPlayerTurn = false;
     const [card, suit] = this.dealerCards[this.dealerCards.length - 1];
     console.log(`Face down card:${card} of ${suit}`);
-    this.checkForAces(false);
+    this.#checkForAces(false);
     this.#checkIfOver21(this.dealerCardSummation);
     this.#continueGame();
   }
@@ -225,11 +225,11 @@ class Game extends Card {
         }
 
         if (this.dealerCardSummation === this.firstSetSummationFromSplit) {
-          console.log("Push");
+          console.log("Push - 1st hand");
           this.cash += this.stake / 2;
         }
         if (this.dealerCardSummation === this.playerCardSummation) {
-          console.log("Push");
+          console.log("Push - 2nd hand");
           this.cash += this.stake / 2;
         }
 
@@ -280,7 +280,7 @@ class Game extends Card {
   }
 
   #canSplit() {
-    const hasSufficientBalanceForSplit = this.getBalance() >= this.stake;
+    const hasSufficientBalanceForSplit = this.#getBalance() >= this.stake;
     return (
       (this.firstServe &&
         hasSufficientBalanceForSplit &&
@@ -294,7 +294,7 @@ class Game extends Card {
   }
 
   #canDoubleDown() {
-    const hasSufficientBalanceForDoubleDown = this.getBalance() >= this.stake;
+    const hasSufficientBalanceForDoubleDown = this.#getBalance() >= this.stake;
     return this.firstServe && hasSufficientBalanceForDoubleDown;
   }
 
@@ -377,7 +377,7 @@ class Game extends Card {
     };
   }
 
-  playFaceDownCard() {
+  #playFaceDownCard() {
     let cardValueSummation = 0;
     const { suit, card } = this.serveCard();
     const cardValue = commonCards.findIndex((item) => item === card) + 1;
@@ -399,7 +399,7 @@ class Game extends Card {
     return false;
   }
 
-  playCard(count = 0, isPlayerPlaying = true) {
+  #playCard(count = 0, isPlayerPlaying = true) {
     let cardValueSummation = 0;
     for (let i = 0; i < count; ++i) {
       const { suit, card } = this.serveCard();
@@ -418,7 +418,7 @@ class Game extends Card {
     return cardValueSummation;
   }
 
-  checkForAces(player = true) {
+  #checkForAces(player = true) {
     if (player) {
       const includesAce = this.playerCards.flat().includes("A");
       if (includesAce) {
@@ -432,7 +432,7 @@ class Game extends Card {
     }
   }
 
-  computeCardSummationBasedOnAceCard(drawnCard, isPlayerPlaying = false) {
+  #computeCardSummationBasedOnAceCard(drawnCard, isPlayerPlaying = false) {
     switch (isPlayerPlaying) {
       case true:
         if (drawnCard === 11) {
@@ -541,4 +541,3 @@ class Game extends Card {
 const play = new Game();
 
 play.startGame();
-//https://stackoverflow.com/questions/77746928/nextui-pagination-paginationitemtype-dots-default-functionality-being-overwrit
