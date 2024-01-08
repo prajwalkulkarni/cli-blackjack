@@ -107,32 +107,39 @@ class Game extends Card {
       this.#gameOver();
     }
     console.log(
-      "Place your bets, your current balance is: " + this.#getBalance()
+      "Place your bets, your current balance is: $" + this.#getBalance()
     );
     const betOptions = this.#generateBetOptions();
-    readLine.question(`${betOptions.toString()}\n`, (input) => {
-      switch (+input) {
-        case 1:
-          this.stake = betOptions[0];
-          this.cash -= this.stake;
-          this.#serveInitialCards();
-          break;
-        case 2:
-          this.stake = betOptions[1];
-          this.cash -= this.stake;
-          this.#serveInitialCards();
-          break;
-        case 3:
-          this.stake = betOptions[2];
-          this.cash -= this.stake;
-          this.#serveInitialCards();
-          break;
-        default:
-          console.log("Invalid input entered, please try again");
-          this.startGame();
-          break;
+    readLine.question(
+      `${betOptions.map(
+        (bet, index) => index + 1 + ". $" + bet
+      )}\n[Press 1 to select $${betOptions[0]}, 2 to select $${
+        betOptions[1]
+      }, 3 to select $${betOptions[2]}]\n`,
+      (input) => {
+        switch (+input) {
+          case 1:
+            this.stake = betOptions[0];
+            this.cash -= this.stake;
+            this.#serveInitialCards();
+            break;
+          case 2:
+            this.stake = betOptions[1];
+            this.cash -= this.stake;
+            this.#serveInitialCards();
+            break;
+          case 3:
+            this.stake = betOptions[2];
+            this.cash -= this.stake;
+            this.#serveInitialCards();
+            break;
+          default:
+            console.log("Invalid input entered, please try again");
+            this.startGame();
+            break;
+        }
       }
-    });
+    );
   }
 
   hit() {
