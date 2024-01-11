@@ -1,6 +1,6 @@
 {
   "name": "blackjack21",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Blackjack on command line",
   "type": "module",
   "scripts": {
@@ -23,7 +23,7 @@
     "url": "https://github.com/prajwalkulkarni/cli-blackjack/issues"
   },
   "homepage": "https://github.com/prajwalkulkarni/cli-blackjack#readme",
-  "bin": "./bin.js",
+  "bin": "./bin.cjs",
   "publishConfig": {
     "access": "public"
   },
