@@ -1,6 +1,6 @@
 {
   "name": "blackjack21",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Blackjack on command line",
   "type": "module",
   "scripts": {
@@ -26,5 +26,10 @@
   "bin": "./bin.js",
   "publishConfig": {
     "access": "public"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.23.4",
+    "@babel/core": "^7.23.7",
+    "@babel/preset-env": "^7.23.8"
   }
 }
