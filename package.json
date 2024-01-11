@@ -1,10 +1,11 @@
 {
   "name": "blackjack21",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Blackjack on command line",
   "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "vite build"
   },
   "repository": {
     "type": "git",
@@ -28,8 +29,6 @@
     "access": "public"
   },
   "devDependencies": {
-    "@babel/cli": "^7.23.4",
-    "@babel/core": "^7.23.7",
-    "@babel/preset-env": "^7.23.8"
+    "vite": "^5.0.11"
   }
 }
