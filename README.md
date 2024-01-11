@@ -6,7 +6,7 @@ This is a simple command-line interface (CLI) blackjack game built using Node.js
 
 - Play blackjack against a computerized dealer.
 - Interactive interface with textual representations of cards.
-- Basic functionalities: hit, stand, split and double down.
+- Basic functionalities: hit, stand, split, and double down.
 - Track your cash and bet accordingly.
 
 ## Requirements
@@ -18,8 +18,15 @@ This is a simple command-line interface (CLI) blackjack game built using Node.js
 To start the game, run the following command:
 
 ```
-node index.js
+npx blackjack21
 ```
+or
+```
+npm install -g blackjack21
+```
+followed by `blackjack21`.
+
+If you want to run the module locally, clone the repository and run `npx .` or `node bin.js`.
 
 Follow the prompts displayed in the terminal to make your moves during the game.
 
@@ -28,7 +35,8 @@ Follow the prompts displayed in the terminal to make your moves during the game.
 The game follows standard blackjack rules.
 
 - You'll be dealt two cards initially.
-- Choose from available actions: hit, stand, split and double down.
+- Bet your stake from the available denominations that is generated based on your current balance.
+- Choose from available actions: hit, stand, split, and double down.
 - Aim to reach a hand value as close to 21 as possible without exceeding it.
 - Beat the dealer's hand without going bust to win.
 
