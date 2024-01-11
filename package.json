@@ -1,6 +1,6 @@
 {
   "name": "blackjack21",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "Blackjack on command line",
   "type": "module",
   "scripts": {
@@ -24,11 +24,17 @@
     "url": "https://github.com/prajwalkulkarni/cli-blackjack/issues"
   },
   "homepage": "https://github.com/prajwalkulkarni/cli-blackjack#readme",
-  "bin": "./bin.cjs",
+  "bin": "./bin.js",
   "publishConfig": {
     "access": "public"
   },
   "devDependencies": {
-    "vite": "^5.0.11"
+    "@babel/cli": "^7.23.4",
+    "@babel/core": "^7.23.7",
+    "@babel/preset-env": "^7.23.8"
+  },
+  "dependencies": {
+    "@babel/polyfill": "^7.12.1",
+    "core-js": "^3.35.0"
   }
 }

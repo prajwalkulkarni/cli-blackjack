@@ -1,11 +1,472 @@
 #!/usr/bin/env node
-"use strict";var z=(o,a,t)=>{if(!a.has(o))throw TypeError("Cannot "+t)};var r=(o,a,t)=>{if(a.has(o))throw TypeError("Cannot add the same private member more than once");a instanceof WeakSet?a.add(o):a.set(o,t)};var s=(o,a,t)=>(z(o,a,"access private method"),t);const N={},B=N.createInterface({input:process.stdin,output:process.stdout}),n=["A",2,3,4,5,6,7,8,9,10,"J","Q","K"],g=[50,100,500,1e3,2e3,5e3,1e4,5e4,1e5,5e5,1e6],S=new Map;let G;S.set(0,"♤");S.set(1,"♣");S.set(2,"♡");S.set(3,"♦");const M={"♦":[...n],"♣":[...n],"♡":[...n],"♤":[...n]};class R{constructor(){this.cards=structuredClone(M)}serveCard(){const a=Math.round(0+3*Math.random()),t=Math.round(0+12*Math.random()),e=this.cards[S.get(a)][t];return e?(this.cards[S.get(a)].splice(t,1),{suit:S.get(a),card:e}):this.serveCard()}getDeckCount(){return Object.keys(this.cards).reduce((a,t)=>(a+=this.cards[t].length,a),0)}}var u,c,I,q,v,E,p,b,k,V,w,j,$,J,H,K,x,L,A,O,y,F,C,D,P,Y,h,m,U,Q;class X extends R{constructor(){super();r(this,u);r(this,I);r(this,v);r(this,p);r(this,k);r(this,w);r(this,$);r(this,H);r(this,x);r(this,A);r(this,y);r(this,C);r(this,P);r(this,h);r(this,U);this.playerCardSummation=0,this.dealerCardSummation=0,this.playerHasAce=!1,this.playerAceUsed=!1,this.dealerHasAce=!1,this.dealerAceUsed=!1,this.isPlayerTurn=!0,this.playerCards=[],this.dealerCards=[],this.cash=2e3,this.stake=0,this.firstServe=!0,this.isPlayingDoubleDown=!1,this.isPlayingSplit=!1,this.standAfterPlayingSplit=!1,this.firstSetSummationFromSplit=0}startGame(){s(this,u,c).call(this)===0&&(console.log(`You are broke. Starting a new game
-`),s(this,h,m).call(this)),console.log("Place your bets, your current balance is: $"+s(this,u,c).call(this));const t=s(this,v,E).call(this);B.question(`${t.map((e,i)=>i+1+". $"+e)}
-[Press 1 to select $${t[0]}, 2 to select $${t[1]}, 3 to select $${t[2]}]
-`,e=>{switch(+e){case 1:this.stake=t[0],this.cash-=this.stake,s(this,p,b).call(this);break;case 2:this.stake=t[1],this.cash-=this.stake,s(this,p,b).call(this);break;case 3:this.stake=t[2],this.cash-=this.stake,s(this,p,b).call(this);break;default:console.log("Invalid input entered, please try again"),this.startGame();break}})}hit(){let t=0;const e=s(this,y,F).call(this,1);if(this.isPlayerTurn?(s(this,P,Y).call(this,e,!0),t=this.isPlayingSplit?this.firstSetSummationFromSplit:this.playerCardSummation):(s(this,P,Y).call(this,e),t=this.dealerCardSummation),s(this,A,O).call(this,t)){this.isPlayerTurn?(this.isPlayingSplit&&G.call(this),this.playerCardSummation>21&&this.standAfterPlayingSplit&&this.stand()):(console.log("You Win"),this.cash+=this.standAfterPlayingSplit&&(this.playerCardSummation>21||this.firstSetSummationFromSplit>21)?this.stake:2*this.stake),console.log("Game over"),s(this,h,m).call(this);return}this.isPlayingDoubleDown||s(this,k,V).call(this)}stand(){console.log(`Dealer's Turn
-`),this.isPlayerTurn=!1;const[t,e]=this.dealerCards[this.dealerCards.length-1];console.log(`Face down card:${t} of ${e}`),s(this,C,D).call(this,!1),s(this,A,O).call(this,this.dealerCardSummation),s(this,k,V).call(this)}getInput(){const t=s(this,$,J).call(this),e=s(this,w,j).call(this);B.question(`Hit or stand?
-Hit = 1, Stand = 2 ${t?"Double = 3":""} ${e?"Split = 4":""}
-`,i=>{switch(+i){case 1:this.hit();break;case 2:if(this.isPlayingSplit){G.call(this);break}this.stand();break;case 3:if(t){this.isPlayingDoubleDown=!0,this.cash-=this.stake,this.stake*=2,this.hit(),this.stand();break}case 4:if(e){this.cash-=this.stake,this.stake*=2,G=s(this,H,K).call(this);break}default:console.log("Invalid input entered, please try again"),this.getInput();break}}),this.firstServe=!1}}u=new WeakSet,c=function(){return this.cash},I=new WeakSet,q=function(){return s(this,u,c).call(this)>0},v=new WeakSet,E=function(){if(s(this,I,q).call(this)){const t=s(this,u,c).call(this);if(t<=500)return g.slice(0,2);let e=g[0];g.forEach(l=>{t>l&&(e=l)});const i=g.findIndex(l=>l===e);return g.slice(i-2,i+1)}},p=new WeakSet,b=function(){this.playerCardSummation=s(this,y,F).call(this,2),s(this,C,D).call(this),console.log(`
-Dealers Card`),this.dealerCardSummation=s(this,y,F).call(this,1,!1),s(this,C,D).call(this,!1),console.log(`Face down card
-`),s(this,x,L).call(this),this.getInput()},k=new WeakSet,V=function(){if(this.isPlayerTurn)this.getInput();else if(this.standAfterPlayingSplit){if(this.dealerCardSummation<17){this.hit();return}const t=this.dealerCardSummation>=17&&this.dealerCardSummation<=21;!t&&this.firstSetSummationFromSplit<=21&&this.playerCardSummation<=21&&(console.log("You win both hands"),this.cash+=2*this.stake),(this.dealerCardSummation>this.firstSetSummationFromSplit||this.firstSetSummationFromSplit>21)&&console.log("Dealer wins against 1st hand"),(this.dealerCardSummation>this.playerCardSummation||this.playerCardSummation>21)&&console.log("Dealer wins against 2nd hand"),this.dealerCardSummation===this.firstSetSummationFromSplit&&(console.log("Push - 1st hand"),this.cash+=this.stake/2),this.dealerCardSummation===this.playerCardSummation&&(console.log("Push - 2nd hand"),this.cash+=this.stake/2),(this.firstSetSummationFromSplit>this.dealerCardSummation&&this.firstSetSummationFromSplit<=21||!t)&&(console.log("You win the 1st hand"),this.cash+=this.stake),(this.playerCardSummation>this.dealerCardSummation&&this.playerCardSummation<=21||!t)&&(console.log("You win the 2nd hand"),this.cash+=this.stake),s(this,h,m).call(this)}else this.dealerCardSummation<17&&this.dealerCardSummation<=this.playerCardSummation?this.hit():this.dealerCardSummation===this.playerCardSummation&&this.dealerCardSummation>=17&&this.dealerCardSummation<=21?(console.log("Push"),this.cash+=this.stake,s(this,h,m).call(this)):this.dealerCardSummation>this.playerCardSummation&&this.dealerCardSummation<=21?(console.log("Dealer wins"),s(this,h,m).call(this)):(console.log("You win"),this.cash+=2*this.stake,s(this,h,m).call(this))},w=new WeakSet,j=function(){const t=s(this,u,c).call(this)>=this.stake;return this.firstServe&&t&&n.findIndex(e=>e===this.playerCards[0][0])>=9&&n.findIndex(e=>e===this.playerCards[1][0])>=9||this.firstServe&&n.findIndex(e=>e===this.playerCards[0][0])===n.findIndex(e=>e===this.playerCards[1][0])},$=new WeakSet,J=function(){const t=s(this,u,c).call(this)>=this.stake;return this.firstServe&&t},H=new WeakSet,K=function(){this.isPlayingSplit=!0;const t=this.playerCards[1],e=this.playerCards[0];this.firstSetSummationFromSplit=0;const i=n.findIndex(l=>l===e[0])+1;return i===1?this.firstSetSummationFromSplit+=11:this.firstSetSummationFromSplit+=i>=10?10:i,this.hit(),this.getInput(),function(){const l=this.firstSetSummationFromSplit;console.log(l),this.playerCardSummation=0;const d=n.findIndex(f=>f===t[0])+1;d===1?this.playerCardSummation+=11:this.playerCardSummation+=d>=10?10:d,this.isPlayingSplit=!1,this.standAfterPlayingSplit=!0,this.hit(),this.getInput()}},x=new WeakSet,L=function(){let t=0;const{suit:e,card:i}=this.serveCard(),l=n.findIndex(d=>d===i)+1;l===1?t+=11:t+=l>=10?10:l,this.dealerCards.push([i,e]),this.dealerCardSummation+=t},A=new WeakSet,O=function(t){return console.log("Current value:",t),t>21?(console.log("Bust"),!0):!1},y=new WeakSet,F=function(t=0,e=!0){let i=0;for(let l=0;l<t;++l){const{suit:d,card:f}=this.serveCard(),T=n.findIndex(W=>W===f)+1;T===1?i+=11:i+=T>=10?10:T,console.log(`${f} of ${d}`),e?this.playerCards.push([f,d]):this.dealerCards.push([f,d])}return i},C=new WeakSet,D=function(t=!0){t?this.playerCards.flat().includes("A")&&(this.playerHasAce=!0):this.dealerCards.flat().includes("A")&&(this.dealerHasAce=!0)},P=new WeakSet,Y=function(t,e=!1){switch(e){case!0:t===11?(this.isPlayingSplit?(this.firstSetSummationFromSplit+=t,this.firstSetSummationFromSplit=this.firstSetSummationFromSplit>21?this.firstSetSummationFromSplit-10:this.firstSetSummationFromSplit):(this.playerCardSummation+=t,this.playerCardSummation=this.playerCardSummation>21?this.playerCardSummation-10:this.playerCardSummation),this.playerHasAce=!0,this.playerAceUsed=!0):this.isPlayingSplit?(this.firstSetSummationFromSplit+=t,this.firstSetSummationFromSplit>21&&this.playerHasAce&&!this.playerAceUsed&&(this.firstSetSummationFromSplit-=10,this.playerAceUsed=!0)):(this.playerCardSummation+=t,this.playerCardSummation>21&&this.playerHasAce&&!this.playerAceUsed&&(this.playerCardSummation-=10,this.playerAceUsed=!0));break;case!1:default:t===11?(this.dealerCardSummation+=t,this.dealerCardSummation=this.dealerCardSummation>21?this.dealerCardSummation-10:this.dealerCardSummation,this.dealerHasAce=!0,this.dealerAceUsed=!0):(this.dealerCardSummation+=t,this.dealerCardSummation>21&&this.dealerHasAce&&!this.dealerAceUsed&&(this.dealerCardSummation-=10,this.dealerAceUsed=!0));break}},h=new WeakSet,m=function(){B.question(`Play Again = 1, Exit = 2
-`,t=>{switch(+t){case 1:s(this,U,Q).call(this);break;case 2:process.exit();default:console.log("Invalid input entered, please try again"),s(this,h,m).call(this);break}})},U=new WeakSet,Q=function(){this.playerCardSummation=0,this.dealerCardSummation=0,this.playerHasAce=!1,this.dealerHasAce=!1,this.playerAceUsed=!1,this.dealerAceUsed=!1,this.isPlayerTurn=!0,this.playerCards=[],this.dealerCards=[],this.firstServe=!0,this.isPlayingDoubleDown=!1,this.isPlayingSplit=!1,this.firstSetSummationFromSplit=0,this.standAfterPlayingSplit=!1,this.cards=structuredClone(M),this.stake=0,this.startGame()};const Z=new X;Z.startGame();
+function _classPrivateMethodInitSpec(obj, privateSet) { _checkPrivateRedeclaration(obj, privateSet); privateSet.add(obj); }
+function _checkPrivateRedeclaration(obj, privateCollection) { if (privateCollection.has(obj)) { throw new TypeError("Cannot initialize the same private elements twice on an object"); } }
+function _classPrivateMethodGet(receiver, privateSet, fn) { if (!privateSet.has(receiver)) { throw new TypeError("attempted to get private field on non-instance"); } return fn; }
+import "core-js/modules/web.dom-exception.constructor.js";
+import "core-js/modules/web.dom-exception.stack.js";
+import "core-js/modules/web.dom-exception.to-string-tag.js";
+import "core-js/modules/web.structured-clone.js";
+import "core-js/modules/es.array.push.js";
+import "core-js/modules/es.error.cause.js";
+import { readLine, commonCards, chips } from "./constants.js";
+const map = new Map();
+let splitSecondHand;
+map.set(0, "♤");
+map.set(1, "♣");
+map.set(2, "♡");
+map.set(3, "♦");
+const Deck = {
+  "♦": [...commonCards],
+  "♣": [...commonCards],
+  "♡": [...commonCards],
+  "♤": [...commonCards]
+};
+class Card {
+  constructor() {
+    this.cards = structuredClone(Deck);
+  }
+  serveCard() {
+    const suit = Math.round(0 + 3 * Math.random());
+    const card = Math.round(0 + 12 * Math.random());
+    const cardToServe = this.cards[map.get(suit)][card];
+    if (!cardToServe) {
+      return this.serveCard();
+    }
+    this.cards[map.get(suit)].splice(card, 1);
+    return {
+      suit: map.get(suit),
+      card: cardToServe
+    };
+  }
+  getDeckCount() {
+    return Object.keys(this.cards).reduce((accumulator, value) => {
+      accumulator += this.cards[value].length;
+      return accumulator;
+    }, 0);
+  }
+}
+var _getBalance = /*#__PURE__*/new WeakSet();
+var _hasSufficientBalance = /*#__PURE__*/new WeakSet();
+var _generateBetOptions = /*#__PURE__*/new WeakSet();
+var _serveInitialCards = /*#__PURE__*/new WeakSet();
+var _continueGame = /*#__PURE__*/new WeakSet();
+var _canSplit = /*#__PURE__*/new WeakSet();
+var _canDoubleDown = /*#__PURE__*/new WeakSet();
+var _playSplit = /*#__PURE__*/new WeakSet();
+var _playFaceDownCard = /*#__PURE__*/new WeakSet();
+var _checkIfOver = /*#__PURE__*/new WeakSet();
+var _playCard = /*#__PURE__*/new WeakSet();
+var _checkForAces = /*#__PURE__*/new WeakSet();
+var _computeCardSummationBasedOnAceCard = /*#__PURE__*/new WeakSet();
+var _gameOver = /*#__PURE__*/new WeakSet();
+var _restart = /*#__PURE__*/new WeakSet();
+class Game extends Card {
+  constructor() {
+    super();
+    _classPrivateMethodInitSpec(this, _restart);
+    _classPrivateMethodInitSpec(this, _gameOver);
+    _classPrivateMethodInitSpec(this, _computeCardSummationBasedOnAceCard);
+    _classPrivateMethodInitSpec(this, _checkForAces);
+    _classPrivateMethodInitSpec(this, _playCard);
+    _classPrivateMethodInitSpec(this, _checkIfOver);
+    _classPrivateMethodInitSpec(this, _playFaceDownCard);
+    _classPrivateMethodInitSpec(this, _playSplit);
+    _classPrivateMethodInitSpec(this, _canDoubleDown);
+    _classPrivateMethodInitSpec(this, _canSplit);
+    _classPrivateMethodInitSpec(this, _continueGame);
+    _classPrivateMethodInitSpec(this, _serveInitialCards);
+    _classPrivateMethodInitSpec(this, _generateBetOptions);
+    _classPrivateMethodInitSpec(this, _hasSufficientBalance);
+    _classPrivateMethodInitSpec(this, _getBalance);
+    this.playerCardSummation = 0;
+    this.dealerCardSummation = 0;
+    this.playerHasAce = false;
+    this.playerAceUsed = false;
+    this.dealerHasAce = false;
+    this.dealerAceUsed = false;
+    this.isPlayerTurn = true;
+    this.playerCards = [];
+    this.dealerCards = [];
+    this.cash = 2000;
+    this.stake = 0;
+    this.firstServe = true;
+    this.isPlayingDoubleDown = false;
+    this.isPlayingSplit = false;
+    this.standAfterPlayingSplit = false;
+    this.firstSetSummationFromSplit = 0;
+  }
+  startGame() {
+    if (_classPrivateMethodGet(this, _getBalance, _getBalance2).call(this) === 0) {
+      console.log("You are broke. Starting a new game\n");
+      _classPrivateMethodGet(this, _gameOver, _gameOver2).call(this);
+    }
+    console.log("Place your bets, your current balance is: $" + _classPrivateMethodGet(this, _getBalance, _getBalance2).call(this));
+    const betOptions = _classPrivateMethodGet(this, _generateBetOptions, _generateBetOptions2).call(this);
+    readLine.question(`${betOptions.map((bet, index) => index + 1 + ". $" + bet)}\n[Press 1 to select $${betOptions[0]}, 2 to select $${betOptions[1]} ${betOptions[2] ? ", 3 to select $" + betOptions[2] : ""}]\n`, input => {
+      switch (+input) {
+        case 1:
+          this.stake = betOptions[0];
+          this.cash -= this.stake;
+          _classPrivateMethodGet(this, _serveInitialCards, _serveInitialCards2).call(this);
+          break;
+        case 2:
+          this.stake = betOptions[1];
+          this.cash -= this.stake;
+          _classPrivateMethodGet(this, _serveInitialCards, _serveInitialCards2).call(this);
+          break;
+        case 3:
+          if (_classPrivateMethodGet(this, _getBalance, _getBalance2).call(this) <= 500) {
+            console.log("Invalid input entered, please try again");
+            this.startGame();
+            return;
+          } else {
+            this.stake = betOptions[2];
+            this.cash -= this.stake;
+            _classPrivateMethodGet(this, _serveInitialCards, _serveInitialCards2).call(this);
+            break;
+          }
+        default:
+          console.log("Invalid input entered, please try again");
+          this.startGame();
+          break;
+      }
+    });
+  }
+  hit() {
+    let summationValue = 0;
+    const drawnCard = _classPrivateMethodGet(this, _playCard, _playCard2).call(this, 1);
+    if (this.isPlayerTurn) {
+      _classPrivateMethodGet(this, _computeCardSummationBasedOnAceCard, _computeCardSummationBasedOnAceCard2).call(this, drawnCard, true);
+      summationValue = this.isPlayingSplit ? this.firstSetSummationFromSplit : this.playerCardSummation;
+    } else {
+      _classPrivateMethodGet(this, _computeCardSummationBasedOnAceCard, _computeCardSummationBasedOnAceCard2).call(this, drawnCard);
+      summationValue = this.dealerCardSummation;
+    }
+    if (_classPrivateMethodGet(this, _checkIfOver, _checkIfOver2).call(this, summationValue)) {
+      if (!this.isPlayerTurn) {
+        console.log("You Win");
+        this.cash += this.standAfterPlayingSplit && (this.playerCardSummation > 21 || this.firstSetSummationFromSplit > 21) ? this.stake : 2 * this.stake;
+      } else {
+        this.isPlayingSplit ? (() => {
+          splitSecondHand.call(this);
+          return;
+        })() : null;
+        this.playerCardSummation > 21 && this.standAfterPlayingSplit ? this.stand() : null;
+      }
+      console.log("Game over");
+      _classPrivateMethodGet(this, _gameOver, _gameOver2).call(this);
+      return;
+    }
+    if (!this.isPlayingDoubleDown) {
+      _classPrivateMethodGet(this, _continueGame, _continueGame2).call(this);
+    }
+  }
+  stand() {
+    console.log("Dealer's Turn\n");
+    this.isPlayerTurn = false;
+    const [card, suit] = this.dealerCards[this.dealerCards.length - 1];
+    console.log(`Face down card:${card} of ${suit}`);
+    _classPrivateMethodGet(this, _checkForAces, _checkForAces2).call(this, false);
+    _classPrivateMethodGet(this, _checkIfOver, _checkIfOver2).call(this, this.dealerCardSummation);
+    _classPrivateMethodGet(this, _continueGame, _continueGame2).call(this);
+  }
+  getInput() {
+    const canDoubleDown = _classPrivateMethodGet(this, _canDoubleDown, _canDoubleDown2).call(this);
+    const canSplit = _classPrivateMethodGet(this, _canSplit, _canSplit2).call(this);
+    readLine.question(`Hit or stand?\nHit = 1, Stand = 2 ${canDoubleDown ? "Double = 3" : ""} ${canSplit ? "Split = 4" : ""}\n`, input => {
+      switch (+input) {
+        case 1:
+          this.hit();
+          break;
+        case 2:
+          if (this.isPlayingSplit) {
+            splitSecondHand.call(this);
+            break;
+          }
+          this.stand();
+          break;
+        case 3:
+          if (canDoubleDown) {
+            this.isPlayingDoubleDown = true;
+            this.cash -= this.stake;
+            this.stake *= 2;
+            this.hit();
+            this.stand();
+            break;
+          }
+        case 4:
+          if (canSplit) {
+            this.cash -= this.stake;
+            this.stake *= 2;
+            splitSecondHand = _classPrivateMethodGet(this, _playSplit, _playSplit2).call(this);
+            break;
+          }
+        default:
+          console.log("Invalid input entered, please try again");
+          this.getInput();
+          break;
+      }
+    });
+    this.firstServe = false;
+  }
+}
+function _getBalance2() {
+  return this.cash;
+}
+function _hasSufficientBalance2() {
+  return _classPrivateMethodGet(this, _getBalance, _getBalance2).call(this) > 0;
+}
+function _generateBetOptions2() {
+  if (_classPrivateMethodGet(this, _hasSufficientBalance, _hasSufficientBalance2).call(this)) {
+    const balance = _classPrivateMethodGet(this, _getBalance, _getBalance2).call(this);
+    if (balance <= 500) {
+      return chips.slice(0, 2);
+    }
+    let highestDenomination = chips[0];
+    chips.forEach(chip => {
+      if (balance > chip) {
+        highestDenomination = chip;
+      }
+    });
+    const chipIndex = chips.findIndex(chip => chip === highestDenomination);
+    return chips.slice(chipIndex - 2, chipIndex + 1);
+  }
+}
+function _serveInitialCards2() {
+  this.playerCardSummation = _classPrivateMethodGet(this, _playCard, _playCard2).call(this, 2);
+  _classPrivateMethodGet(this, _checkForAces, _checkForAces2).call(this);
+  console.log("\nDealers Card");
+  this.dealerCardSummation = _classPrivateMethodGet(this, _playCard, _playCard2).call(this, 1, false);
+  _classPrivateMethodGet(this, _checkForAces, _checkForAces2).call(this, false);
+  console.log("Face down card\n");
+  _classPrivateMethodGet(this, _playFaceDownCard, _playFaceDownCard2).call(this);
+  this.getInput();
+}
+function _continueGame2() {
+  if (this.isPlayerTurn) {
+    this.getInput();
+  } else {
+    if (this.standAfterPlayingSplit) {
+      if (this.dealerCardSummation < 17) {
+        this.hit();
+        return;
+      }
+      const dealerAlive = this.dealerCardSummation >= 17 && this.dealerCardSummation <= 21;
+      if (!dealerAlive && this.firstSetSummationFromSplit <= 21 && this.playerCardSummation <= 21) {
+        console.log("You win both hands");
+        this.cash += 2 * this.stake;
+      }
+      if (this.dealerCardSummation > this.firstSetSummationFromSplit || this.firstSetSummationFromSplit > 21) {
+        console.log("Dealer wins against 1st hand");
+      }
+      if (this.dealerCardSummation > this.playerCardSummation || this.playerCardSummation > 21) {
+        console.log("Dealer wins against 2nd hand");
+      }
+      if (this.dealerCardSummation === this.firstSetSummationFromSplit) {
+        console.log("Push - 1st hand");
+        this.cash += this.stake / 2;
+      }
+      if (this.dealerCardSummation === this.playerCardSummation) {
+        console.log("Push - 2nd hand");
+        this.cash += this.stake / 2;
+      }
+      if (this.firstSetSummationFromSplit > this.dealerCardSummation && this.firstSetSummationFromSplit <= 21 || !dealerAlive) {
+        console.log("You win the 1st hand");
+        this.cash += this.stake;
+      }
+      if (this.playerCardSummation > this.dealerCardSummation && this.playerCardSummation <= 21 || !dealerAlive) {
+        console.log("You win the 2nd hand");
+        this.cash += this.stake;
+      }
+      _classPrivateMethodGet(this, _gameOver, _gameOver2).call(this);
+    } else {
+      if (this.dealerCardSummation < 17 && this.dealerCardSummation <= this.playerCardSummation) {
+        this.hit();
+      } else if (this.dealerCardSummation === this.playerCardSummation && this.dealerCardSummation >= 17 && this.dealerCardSummation <= 21) {
+        console.log("Push");
+        this.cash += this.stake;
+        _classPrivateMethodGet(this, _gameOver, _gameOver2).call(this);
+      } else if (this.dealerCardSummation > this.playerCardSummation && this.dealerCardSummation <= 21) {
+        console.log("Dealer wins");
+        _classPrivateMethodGet(this, _gameOver, _gameOver2).call(this);
+      } else {
+        console.log("You win");
+        this.cash += 2 * this.stake;
+        _classPrivateMethodGet(this, _gameOver, _gameOver2).call(this);
+      }
+    }
+  }
+}
+function _canSplit2() {
+  const hasSufficientBalanceForSplit = _classPrivateMethodGet(this, _getBalance, _getBalance2).call(this) >= this.stake;
+  return this.firstServe && hasSufficientBalanceForSplit && commonCards.findIndex(card => card === this.playerCards[0][0]) >= 9 && commonCards.findIndex(card => card === this.playerCards[1][0]) >= 9 || this.firstServe && commonCards.findIndex(card => card === this.playerCards[0][0]) === commonCards.findIndex(card => card === this.playerCards[1][0]);
+}
+function _canDoubleDown2() {
+  const hasSufficientBalanceForDoubleDown = _classPrivateMethodGet(this, _getBalance, _getBalance2).call(this) >= this.stake;
+  return this.firstServe && hasSufficientBalanceForDoubleDown;
+}
+function _playSplit2() {
+  this.isPlayingSplit = true;
+  const secondSetCard = this.playerCards[1];
+  const firstSetCard = this.playerCards[0];
+  this.firstSetSummationFromSplit = 0;
+  const cardValue = commonCards.findIndex(card => card === firstSetCard[0]) + 1;
+  if (cardValue === 1) {
+    this.firstSetSummationFromSplit += 11;
+  } else {
+    this.firstSetSummationFromSplit += cardValue >= 10 ? 10 : cardValue;
+  }
+  this.hit();
+  this.getInput();
+  return function () {
+    const firstSetSummation = this.firstSetSummationFromSplit;
+    console.log(firstSetSummation);
+    this.playerCardSummation = 0;
+    const cardValue = commonCards.findIndex(card => card === secondSetCard[0]) + 1;
+    if (cardValue === 1) {
+      this.playerCardSummation += 11;
+    } else {
+      this.playerCardSummation += cardValue >= 10 ? 10 : cardValue;
+    }
+    this.isPlayingSplit = false;
+    this.standAfterPlayingSplit = true;
+    this.hit();
+    this.getInput();
+  };
+}
+function _playFaceDownCard2() {
+  let cardValueSummation = 0;
+  const {
+    suit,
+    card
+  } = this.serveCard();
+  const cardValue = commonCards.findIndex(item => item === card) + 1;
+  if (cardValue === 1) {
+    cardValueSummation += 11;
+  } else {
+    cardValueSummation += cardValue >= 10 ? 10 : cardValue;
+  }
+  this.dealerCards.push([card, suit]);
+  this.dealerCardSummation += cardValueSummation;
+}
+function _checkIfOver2(value) {
+  console.log("Current value:", value);
+  if (value > 21) {
+    console.log("Bust");
+    return true;
+  }
+  return false;
+}
+function _playCard2(count = 0, isPlayerPlaying = true) {
+  let cardValueSummation = 0;
+  for (let i = 0; i < count; ++i) {
+    const {
+      suit,
+      card
+    } = this.serveCard();
+    const cardValue = commonCards.findIndex(item => item === card) + 1;
+    if (cardValue === 1) {
+      cardValueSummation += 11;
+    } else {
+      cardValueSummation += cardValue >= 10 ? 10 : cardValue;
+    }
+    console.log(`${card} of ${suit}`);
+    isPlayerPlaying ? this.playerCards.push([card, suit]) : this.dealerCards.push([card, suit]);
+  }
+  return cardValueSummation;
+}
+function _checkForAces2(player = true) {
+  if (player) {
+    const includesAce = this.playerCards.flat().includes("A");
+    if (includesAce) {
+      this.playerHasAce = true;
+    }
+  } else {
+    const includesAce = this.dealerCards.flat().includes("A");
+    if (includesAce) {
+      this.dealerHasAce = true;
+    }
+  }
+}
+function _computeCardSummationBasedOnAceCard2(drawnCard, isPlayerPlaying = false) {
+  switch (isPlayerPlaying) {
+    case true:
+      if (drawnCard === 11) {
+        if (this.isPlayingSplit) {
+          this.firstSetSummationFromSplit += drawnCard;
+          this.firstSetSummationFromSplit = this.firstSetSummationFromSplit > 21 ? this.firstSetSummationFromSplit - 10 : this.firstSetSummationFromSplit;
+        } else {
+          this.playerCardSummation += drawnCard;
+          this.playerCardSummation = this.playerCardSummation > 21 ? this.playerCardSummation - 10 : this.playerCardSummation;
+        }
+        this.playerHasAce = true;
+        this.playerAceUsed = true;
+      } else {
+        if (this.isPlayingSplit) {
+          this.firstSetSummationFromSplit += drawnCard;
+          if (this.firstSetSummationFromSplit > 21 && this.playerHasAce && !this.playerAceUsed) {
+            this.firstSetSummationFromSplit -= 10;
+            this.playerAceUsed = true;
+          }
+        } else {
+          this.playerCardSummation += drawnCard;
+          if (this.playerCardSummation > 21 && this.playerHasAce && !this.playerAceUsed) {
+            this.playerCardSummation -= 10;
+            this.playerAceUsed = true;
+          }
+        }
+      }
+      break;
+    case false:
+    default:
+      if (drawnCard === 11) {
+        this.dealerCardSummation += drawnCard;
+        this.dealerCardSummation = this.dealerCardSummation > 21 ? this.dealerCardSummation - 10 : this.dealerCardSummation;
+        this.dealerHasAce = true;
+        this.dealerAceUsed = true;
+      } else {
+        this.dealerCardSummation += drawnCard;
+        if (this.dealerCardSummation > 21 && this.dealerHasAce && !this.dealerAceUsed) {
+          this.dealerCardSummation -= 10;
+          this.dealerAceUsed = true;
+        }
+      }
+      break;
+  }
+}
+function _gameOver2() {
+  readLine.question(`Play Again = 1, Exit = 2\n`, input => {
+    switch (+input) {
+      case 1:
+        _classPrivateMethodGet(this, _restart, _restart2).call(this);
+        break;
+      case 2:
+        process.exit();
+      default:
+        console.log("Invalid input entered, please try again");
+        _classPrivateMethodGet(this, _gameOver, _gameOver2).call(this);
+        break;
+    }
+  });
+}
+function _restart2() {
+  this.playerCardSummation = 0;
+  this.dealerCardSummation = 0;
+  this.playerHasAce = false;
+  this.dealerHasAce = false;
+  this.playerAceUsed = false;
+  this.dealerAceUsed = false;
+  this.isPlayerTurn = true;
+  this.playerCards = [];
+  this.dealerCards = [];
+  this.firstServe = true;
+  this.isPlayingDoubleDown = false;
+  this.isPlayingSplit = false;
+  this.firstSetSummationFromSplit = 0;
+  this.standAfterPlayingSplit = false;
+  this.cards = structuredClone(Deck);
+  this.stake = 0;
+  this.startGame();
+}
+const play = new Game();
+play.startGame();

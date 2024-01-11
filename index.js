@@ -1,6 +1,5 @@
 #!/usr/bin/env node
 import { readLine, commonCards, chips } from "./constants.js";
-
 const map = new Map();
 
 let splitSecondHand;
@@ -113,9 +112,9 @@ class Game extends Card {
     readLine.question(
       `${betOptions.map(
         (bet, index) => index + 1 + ". $" + bet
-      )}\n[Press 1 to select $${betOptions[0]}, 2 to select $${
-        betOptions[1]
-      }, 3 to select $${betOptions[2]}]\n`,
+      )}\n[Press 1 to select $${betOptions[0]}, 2 to select $${betOptions[1]} ${
+        betOptions[2] ? ", 3 to select $" + betOptions[2] : ""
+      }]\n`,
       (input) => {
         switch (+input) {
           case 1:
@@ -129,10 +128,16 @@ class Game extends Card {
             this.#serveInitialCards();
             break;
           case 3:
-            this.stake = betOptions[2];
-            this.cash -= this.stake;
-            this.#serveInitialCards();
-            break;
+            if (this.#getBalance() <= 500) {
+              console.log("Invalid input entered, please try again");
+              this.startGame();
+              return;
+            } else {
+              this.stake = betOptions[2];
+              this.cash -= this.stake;
+              this.#serveInitialCards();
+              break;
+            }
           default:
             console.log("Invalid input entered, please try again");
             this.startGame();
