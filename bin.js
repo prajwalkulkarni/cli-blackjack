@@ -157,7 +157,7 @@ class Game extends Card {
       _classPrivateMethodGet(this, _gameOver, _gameOver2).call(this);
       return;
     }
-    if (!this.isPlayingDoubleDown) {
+    if (!this.isPlayingDoubleDown || this.isPlayingDoubleDown && !this.isPlayerTurn) {
       _classPrivateMethodGet(this, _continueGame, _continueGame2).call(this);
     }
   }
@@ -191,7 +191,9 @@ class Game extends Card {
             this.cash -= this.stake;
             this.stake *= 2;
             this.hit();
-            this.stand();
+            if (this.playerCardSummation <= 21) {
+              this.stand();
+            }
             break;
           }
         case 4:
@@ -280,7 +282,7 @@ function _continueGame2() {
       }
       _classPrivateMethodGet(this, _gameOver, _gameOver2).call(this);
     } else {
-      if (this.dealerCardSummation < 17 && this.dealerCardSummation <= this.playerCardSummation) {
+      if (this.dealerCardSummation < 17) {
         this.hit();
       } else if (this.dealerCardSummation === this.playerCardSummation && this.dealerCardSummation >= 17 && this.dealerCardSummation <= 21) {
         console.log("Push");

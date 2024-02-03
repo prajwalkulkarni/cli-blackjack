@@ -186,7 +186,7 @@ class Game extends Card {
 
       return;
     }
-    if (!this.isPlayingDoubleDown) {
+    if (!this.isPlayingDoubleDown || (this.isPlayingDoubleDown && !this.isPlayerTurn)) {
       this.#continueGame();
     }
   }
@@ -263,8 +263,7 @@ class Game extends Card {
         this.#gameOver();
       } else {
         if (
-          this.dealerCardSummation < 17 &&
-          this.dealerCardSummation <= this.playerCardSummation
+          this.dealerCardSummation < 17 
         ) {
           this.hit();
         } else if (
@@ -334,7 +333,9 @@ class Game extends Card {
               this.cash -= this.stake;
               this.stake *= 2;
               this.hit();
-              this.stand();
+              if(this.playerCardSummation <= 21){
+                this.stand();
+              }
               break;
             }
           case 4:

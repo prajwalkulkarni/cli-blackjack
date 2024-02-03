@@ -1,11 +1,11 @@
 {
   "name": "blackjack21",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "Blackjack on command line",
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "vite build"
+    "build": "npx babel index.js --out-file bin.js"
   },
   "repository": {
     "type": "git",
